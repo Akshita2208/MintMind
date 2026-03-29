@@ -1,100 +1,81 @@
-# MintMind
-AI-based financial platform that replaces expensive advisors with smart tools for tax, investment, and goal planning.
+# MintMind - AI Money Mentor 🚀
 
-Overview
+A fully functional, production-ready backend and frontend web application built during a hackathon to provide AI-powered financial advisory for Indian retail investors.
 
-MintMind is an AI-powered personal finance platform that helps individuals and families manage their finances with ease. It combines multiple financial tools like tax planning, investment analysis, retirement planning, and financial health tracking into one seamless experience.
+## ⚙️ Tech Stack
 
-👉 Built to make financial planning simple, accessible, and intelligent.
+- **Backend:** FastAPI, Python 3.9+
+- **Database:** MongoDB (using Motor async driver)
+- **Auth:** JWT and `passlib` (bcrypt hashing)
+- **AI Integration:** Anthropic API (Claude 3 Haiku)
+- **Frontend:** HTML, CSS, Vanilla JS
 
-🎯 Problem
-95% of Indians lack structured financial planning
-Financial advisors are expensive (~₹25,000/year)
-No unified platform for taxes, investments, and goals
-Lack of tools for joint financial planning (couples)
+## 📁 Project Structure
 
-💡 Solution
-MintMind provides an all-in-one AI-based financial ecosystem that:
-Simplifies financial decision-making
-Provides personalized insights
-Helps users plan, save, and invest smarter
+```text
+├── main.py                  # FastAPI Application Entry
+├── requirements.txt         # Dependencies
+├── .env                     # Environment variables configuration
+├── models/
+│   ├── user.py              # Pydantic schemas for User Auth
+│   └── report.py            # Pydantic schemas for AI Reports
+├── auth/
+│   └── jwt_handler.py       # JWT encoding/decoding, Auth dependencies
+├── services/
+│   └── db.py                # MongoDB async motor client setup
+├── routes/
+│   ├── auth.py              # Signup, Login, Me endpoints
+│   ├── dashboard.py         # Fetch user dashboard reports
+│   ├── wizard.py            # Tax Wizard PDF analysis via Anthropic
+│   └── mfxray.py            # MF X-Ray CSV/PDF analysis via Anthropic
+└── static/
+    ├── index.html           # Marketing page with auth modal
+    └── dashboard.html       # Protected dashboard to run reports
+```
 
-✨ Features
+## 🚀 Running Locally
 
-🧾 Tax Wizard
-Upload Form 16
-Old vs New tax regime comparison
-Identify missed deductions
-Tax-saving suggestions
+1. **Install Dependencies:**
+   Ensure you have Python 3.8+ installed. Set up your virtual environment and install the requirements:
+   ```bash
+   python -m venv venv
+   source venv/Scripts/activate  # Or `venv\Scripts\activate` on Windows
+   pip install -r requirements.txt
+   ```
 
-📊 MF Portfolio X-Ray
-Upload CAMS/KFintech statements
-XIRR calculation
-Portfolio overlap analysis
-Rebalancing suggestions
+2. **Setup MongoDB:**
+   You must have MongoDB running locally at `mongodb://localhost:27017` or provide a cloud URI. Ensure your `.env` is updated:
+   ```env
+   MONGO_URI=mongodb://localhost:27017
+   JWT_SECRET=your_super_secret_jwt_key
+   ANTHROPIC_API_KEY=your_anthropic_api_key  # Optional: Will fallback to mock responses if blank
+   ```
 
-🎯 FIRE Path Planner
-Plan early retirement
-Calculate required corpus
-Monthly SIP roadmap
-Goal-based financial planning
+3. **Start the FastAPI Server:**
+   ```bash
+   uvicorn main:app --reload
+   ```
+   Or simply run the main script:
+   ```bash
+   python main.py
+   ```
 
-❤️ Money Health Score
-Evaluate financial fitness
-Score based on savings, investments, debt, insurance
-Personalized improvement suggestions
+4. **Access the App:**
+   - App URL: `http://localhost:8000`
+   - API Docs: `http://localhost:8000/docs`
 
-🔄 Life Event Advisor
-Financial guidance for:
-Bonus
-Marriage
-Job change
-Smart allocation strategies
+## ☁️ Deployment Instructions (Render / Railway / Heroku)
 
-👩‍❤️‍👨 Couple’s Money Planner
-Joint financial planning
-Income-based expense split
-Combined net worth tracking
-Shared financial goals
+1. Provision a free MongoDB cluster on **MongoDB Atlas** and get the Connection string.
+2. In your deployment dashboard (e.g., Render), create a new Web Service pointing to this GitHub Repo.
+3. Add the Environment Variables: `MONGO_URI`, `JWT_SECRET`, and `ANTHROPIC_API_KEY`.
+4. Set the Start Command to:
+   ```bash
+   uvicorn main:app --host 0.0.0.0 --port $PORT
+   ```
 
-⚙️ How It Works
-Login / Signup
-      ↓
-Choose Feature
-      ↓
-Enter Data / Upload Documents
-      ↓
-AI Processing & Analysis
-      ↓
-Get Insights & Action Plan
-
-🛠️ Tech Stack
-Frontend: HTML, CSS, JavaScript
-Data Handling: LocalStorage
-Deployment: Antigravity
-AI Logic: Rule-based financial calculations
-
-💸 Pricing
-Plan	Features
-Free	
-Money Health Score, 1 Tax Analysis/year
-
-Pro 
-₹299	All features + Priority AI support
-
-Family 
-₹499	Couple Planner + Family tracking
-
-📈 Impact
-Improves financial literacy
-Encourages better saving habits
-Helps users make informed decisions
-Reduces dependency on expensive advisors
-
-🚀 Future Scope
-Bank API integration
-Real-time financial tracking
-AI chatbot advisor
-Mobile application
-Advanced analytics dashboard
-
+## 🏆 Hackathon Bonus Features Included
+- **Modular Codebase:** Perfectly structured for adding more endpoints.
+- **Security & Validation:** JWTs, Bcrypt, 5MB File sizing limits, Explicit `CORSMiddleware`.
+- **UI UX Polish:** Async spinners during PDF parsing, Auth Modals, Interactive dashboard.
+- **Graceful Degradation:** If `ANTHROPIC_API_KEY` is not present, the app gracefully spins up Mock outputs so the app remains demoable off the shelf.
