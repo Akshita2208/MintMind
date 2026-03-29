@@ -74,8 +74,4 @@ A fully functional, production-ready backend and frontend web application built 
    uvicorn main:app --host 0.0.0.0 --port $PORT
    ```
 
-## 🏆 Hackathon Bonus Features Included
-- **Modular Codebase:** Perfectly structured for adding more endpoints.
-- **Security & Validation:** JWTs, Bcrypt, 5MB File sizing limits, Explicit `CORSMiddleware`.
-- **UI UX Polish:** Async spinners during PDF parsing, Auth Modals, Interactive dashboard.
-- **Graceful Degradation:** If `ANTHROPIC_API_KEY` is not present, the app gracefully spins up Mock outputs so the app remains demoable off the shelf.
+
