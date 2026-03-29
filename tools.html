@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tool — MintMind</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0B0E14;
+      --card: #151821;
+      --ink: #1A1D27;
+      --paper: #F5F2EB;
+      --muted: #8F94A3;
+      --border: #2A2F3D;
+      --accent: #1EB872;
+      --accent2: #4E65FF;
+      --accent3: #FF4E65;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--paper); font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; padding: 40px 24px; }
+    
+    .dash-header { max-width: 800px; margin: 0 auto; display:flex; align-items:center; gap: 24px; margin-bottom: 40px; }
+    .back-btn { font-size: 1.5rem; color: var(--muted); text-decoration: none; width: 44px; height: 44px; display:flex; align-items:center; justify-content:center; background: var(--card); border-radius: 50%; border: 1px solid var(--border); transition: 0.2s;}
+    .back-btn:hover { background: var(--border); color: var(--paper); }
+    .dash-title { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 700; }
+    .dash-sub { color: var(--muted); font-size: 1rem; margin-top: 4px; }
+    
+    .tool-box { max-width: 800px; margin: 0 auto; background: var(--card); padding: 40px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
+    
+    .form-group { margin-bottom: 24px; }
+    .form-label { display: block; font-size: 0.95rem; margin-bottom: 8px; font-weight: 500; color: var(--paper); }
+    .form-input, .form-select { width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 8px; background: rgba(0,0,0,0.2); color: var(--paper); font-family: inherit; font-size: 1rem; transition: 0.2s;}
+    .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent); background: rgba(0,0,0,0.4); }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    
+    .btn-primary { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: background .2s; width: 100%; margin-top: 10px; }
+    .btn-primary:hover { background: #145c3d; }
+    .btn-secondary { background: transparent; color: var(--paper); border: 1px solid var(--border); padding: 16px; border-radius: 8px; font-family: inherit; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 20px; }
+    .btn-secondary:hover { background: var(--ink); }
+    
+    .result-card { background: var(--ink); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+    .green { color: var(--accent); }
+    .red { color: var(--accent3); }
+    
+    /* Animation classes */
+    .fade-in { animation: fadeIn 0.4s ease forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <script>
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'index.html';
+    }
+  </script>
+
+  <div class="dash-header">
+    <a href="dashboard.html" class="back-btn">←</a>
+    <div>
+      <h1 class="dash-title" id="toolTitle">Loading...</h1>
+      <p class="dash-sub" id="toolDesc">Please wait</p>
+    </div>
+  </div>
+
+  <div class="tool-box">
+    <!-- INPUT VIEW -->
+    <div id="inputView" class="fade-in">
+      <form id="toolForm" onsubmit="calculateTool(event)">
+        <div id="formFields" class="grid-2"></div>
+        <button type="submit" class="btn-primary">Calculate Plan</button>
+      </form>
+    </div>
+
+    <!-- LOADING VIEW -->
+    <div id="loadingView" style="display:none; text-align:center; padding: 60px 20px;">
+      <div style="font-size: 3rem; margin-bottom: 20px; animation: pulse 1s infinite alternate;">⏳</div>
+      <h2 style="font-family:'Syne', sans-serif;">Processing...</h2>
+      <p style="color:var(--muted); margin-top:10px;">Our AI is crunching the numbers for you.</p>
+    </div>
+
+    <!-- RESULTS VIEW -->
+    <div id="resultsView" style="display:none;" class="fade-in">
+      <div id="resultsContent"></div>
+      <button onclick="window.print()" class="btn-primary" style="background:#4E65FF; margin-top:30px;">Download Report (PDF)</button>
+      <button onclick="resetTool()" class="btn-secondary">Recalculate</button>
+    </div>
+  </div>
+
+  <style>
+    @keyframes pulse { from { transform: scale(1); opacity: 0.7; } to { transform: scale(1.1); opacity: 1; } }
+  </style>
+
+  <script>
+    function formatMoney(num) {
+      return Math.round(num).toLocaleString('en-IN');
+    }
+
+    const configs = {
+      fire: {
+        title: "FIRE Path Planner",
+        desc: "Calculate your exact retirement age and required corpus.",
+        fields: [
+          { id: 'age', label: 'Current Age', type: 'number', val: 28 },
+          { id: 'retireAge', label: 'Retirement Age Goal', type: 'number', val: 45 },
+          { id: 'income', label: 'Monthly Income (₹)', type: 'number', val: 150000 },
+          { id: 'expenses', label: 'Monthly Expenses (₹)', type: 'number', val: 60000 },
+          { id: 'savings', label: 'Current Savings/Investments (₹)', type: 'number', val: 800000 },
+          { id: 'returnRate', label: 'Expected Return Rate (%)', type: 'number', val: 12 },
+          { id: 'inflation', label: 'Expected Inflation Rate (%)', type: 'number', val: 6 }
+        ],
+        calc: (data) => {
+          const N = data.retireAge - data.age;
+          if (N <= 0) throw new Error("Retirement age must be greater than current age.");
+          const SIP = data.income - data.expenses;
+          if (SIP <= 0) throw new Error("Expenses are higher than income. You need a surplus to calculate FIRE.");
+          
+          const futureAnnualExpenses = (data.expenses * 12) * Math.pow(1 + data.inflation/100, N);
+          const requiredCorpus = futureAnnualExpenses * 25; // 4% rule equivalent
+          
+          const nTotal = N * 12;
+          const rMonth = (data.returnRate / 100) / 12;
+          
+          let fvSIP = 0;
+          if (rMonth > 0) {
+              fvSIP = SIP * ((Math.pow(1 + rMonth, nTotal) - 1) / rMonth) * (1 + rMonth);
+          } else {
+              fvSIP = SIP * nTotal;
+          }
+          const fvLump = data.savings * Math.pow(1 + data.returnRate/100, N);
+          const totalFutureValue = fvSIP + fvLump;
+          const isAchievable = totalFutureValue >= requiredCorpus;
+          
+          setTimeout(() => renderFireChart(data.savings, SIP, rMonth, nTotal), 50);
+
+          return `
+            <div class="result-card" style="text-align:center;">
+              <div style="font-size:2.5rem; color:var(--accent); font-weight:700;">₹${formatMoney(requiredCorpus)}</div>
+              <div style="color:var(--muted); margin-top:5px;">Required Retirement Corpus</div>
+            </div>
+            <div class="grid-2" style="margin-top:24px;">
+                <div class="result-card">
+                  <div style="font-size:1.8rem; color:var(--paper); font-weight:700;">${N} Years</div>
+                  <div style="font-size:0.9rem; color:var(--muted); margin-top:5px;">Time to Goal</div>
+                </div>
+                <div class="result-card">
+                  <div style="font-size:1.8rem; color:${isAchievable ? 'var(--accent)' : 'var(--accent3)'}; font-weight:700;">₹${formatMoney(totalFutureValue)}</div>
+                  <div style="font-size:0.9rem; color:var(--muted); margin-top:5px;">Estimated Portfolio at ${data.retireAge}</div>
+                </div>
+            </div>
+            <div class="result-card" style="margin-top:24px; padding:20px; border-left: 4px solid ${isAchievable ? 'var(--accent)' : 'var(--accent3)'};">
+               <strong style="color:var(--paper); display:block; margin-bottom:10px;">💡 AI Insight</strong>
+               <p style="color:var(--muted); font-size:0.95rem; line-height:1.6;">
+                 ${isAchievable ? "🎉 Congratulations! You are completely on track for your FIRE goal building wealth via SIP and compounding." : 
+                 `⚠️ You have a projected shortfall of ₹${formatMoney(requiredCorpus - totalFutureValue)}. To reach this safely, you must increase your monthly SIP by roughly ₹${formatMoney((requiredCorpus - totalFutureValue)/((Math.pow(1 + rMonth, nTotal) - 1) / rMonth))} or adjust your target retirement age.`}
+               </p>
+            </div>
+            <div style="margin-top:30px; background:var(--ink); padding:20px; border-radius:12px; border:1px solid var(--border)">
+               <h3 style="margin-bottom:15px; font-size:1rem; color:var(--paper)">Portfolio Growth Trajectory</h3>
+               <canvas id="fireChartCanvas" height="150"></canvas>
+            </div>
+          `;
+        }
+      },
+      health: {
+        title: "Money Health Score",
+        desc: "Audit your finances across 5 critical dimensions.",
+        fields: [
+          { id: 'income', label: 'Monthly Income (₹)', type: 'number', val: 120000 },
+          { id: 'expenses', label: 'Monthly Expenses (₹)', type: 'number', val: 70000 },
+          { id: 'savings', label: 'Total Liquid Savings/Emergency Fund (₹)', type: 'number', val: 300000 },
+          { id: 'investments', label: 'Total Equity/MF Investments (₹)', type: 'number', val: 500000 },
+          { id: 'debt', label: 'Total Outstanding Debt (₹)', type: 'number', val: 150000 },
+          { id: 'insurance', label: 'Do you have Term Insurance?', type: 'select', opts: ['Yes', 'No'] }
+        ],
+        calc: (data) => {
+           let score = 50;
+           const suggestions = [];
+           
+           if (data.savings >= data.expenses * 6) { score += 20; suggestions.push("✅ Excellent emergency buffer (6+ months)."); }
+           else if (data.savings >= data.expenses * 3) { score += 10; suggestions.push("⚠️ Emergency fund is okay, but aim for 6 months."); }
+           else { score -= 10; suggestions.push("🚨 High Risk: Build an emergency fund of at least 3-6 months immediately."); }
+           
+           const savingsRatio = (data.income - data.expenses) / data.income;
+           if (savingsRatio >= 0.2) { score += 15; suggestions.push(`✅ Good savings rate (${Math.round(savingsRatio*100)}%).`); }
+           else { score -= 10; suggestions.push("⚠️ Try to reduce lifestyle expenses to hit the 20% savings rule."); }
+           
+           if (data.debt > data.income * 12) { score -= 15; suggestions.push("🚨 Debt is extremely high. Focus aggressive payments on high-interest loans."); }
+           else if (data.debt > 0) { score -= 5; suggestions.push("⚠️ Formulate a focused debt-paydown strategy."); }
+           else { score += 10; suggestions.push("✅ Debt-free baseline!"); }
+           
+           if (data.investments > data.income * 2) { score += 10; suggestions.push("✅ Solid equity investment base compounding."); }
+           else { suggestions.push("⚠️ Increase consistent investments in equity via SIPs."); }
+           
+           if (data.insurance === 'Yes') { score += 10; }
+           else { score -= 20; suggestions.push("🚨 Critical: You are highly exposed. Buy a pure Term Life Insurance plan immediately."); }
+           
+           score = Math.max(0, Math.min(100, Math.round(score)));
+           let category = score >= 80 ? "Excellent" : score >= 50 ? "Average" : "Poor";
+           let color = score >= 80 ? "var(--accent)" : score >= 50 ? "#f59e0b" : "var(--accent3)";
+
+           setTimeout(() => renderHealthDoughnut(score, color), 50);
+           
+           return `
+              <div class="grid-2">
+                <div class="result-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                   <div style="position:relative; width:150px; height:150px;">
+                      <canvas id="healthCanvas"></canvas>
+                      <div style="position:absolute; top:0;left:0; right:0;bottom:0; display:flex; align-items:center; justify-content:center; flex-direction:column; padding-top:10px;">
+                          <span style="font-size:2rem; font-weight:800; font-family:'Syne', sans-serif;">${score}</span>
+                      </div>
+                   </div>
+                   <div style="font-size:1.2rem; font-weight:700; color:${color}; margin-top:15px;">${category} Health</div>
+                </div>
+                <div class="result-card" style="display:flex; flex-direction:column; justify-content:center;">
+                   <h3 style="color:var(--paper); margin-bottom:15px; font-size:1.1rem;">Your Action Plan</h3>
+                   <ul style="color:var(--muted); font-size:0.90rem; line-height:1.7; padding-left: 0; list-style:none;">
+                     ${suggestions.map(s => `<li style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05)">${s}</li>`).join('')}
+                   </ul>
+                </div>
+              </div>
+           `;
+        }
+      },
+      life: {
+        title: "Life Event Advisor",
+        desc: "Instant financial strategies optimized for major life transitions.",
+        fields: [
+          { id: 'event', label: 'Select Life Event', type: 'select', opts: ['Annual Bonus', 'Inheritance', 'New Job', 'Baby / Childbirth', 'Marriage'] },
+          { id: 'amount', label: 'Amount Received (₹) [If applicable]', type: 'number', val: 200000 },
+          { id: 'income', label: 'Current Monthly Income (₹)', type: 'number', val: 100000 }
+        ],
+        calc: (data) => {
+           if (['Annual Bonus', 'Inheritance'].includes(data.event)) {
+              let invest = data.amount * 0.5;
+              let save = data.amount * 0.3;
+              let spend = data.amount * 0.2;
+              return `
+                 <div class="result-card" style="text-align:center; padding: 20px;">
+                    <h3 style="font-size:1.4rem; color:var(--paper);">${data.event} Deployment Strategy</h3>
+                    <p style="color:var(--muted); margin-top:8px;">Applying the 50/30/20 Windfall Rule</p>
+                 </div>
+                 <div class="grid-2" style="margin-top:20px;">
+                    <div class="result-card" style="border-top:4px solid var(--accent)"><div style="color:var(--accent); font-size:1.8rem; font-weight:700;">₹${formatMoney(invest)}</div><div style="color:var(--paper); margin-top:6px; font-weight:500;">Aggressive Invest (50%)</div><div style="color:var(--muted); font-size:0.85rem; margin-top:4px;">Deploy into diversified MFs/Stocks.</div></div>
+                    <div class="result-card" style="border-top:4px solid #4E65FF"><div style="color:#4E65FF; font-size:1.8rem; font-weight:700;">₹${formatMoney(save)}</div><div style="color:var(--paper); margin-top:6px; font-weight:500;">Safe Buffer (30%)</div><div style="color:var(--muted); font-size:0.85rem; margin-top:4px;">Park in FDs or use to clear expensive debt.</div></div>
+                 </div>
+                 <div class="result-card" style="margin-top:20px; border-top:4px solid #f59e0b">
+                    <div style="color:#f59e0b; font-size:1.8rem; font-weight:700;">₹${formatMoney(spend)}</div><div style="color:var(--paper); margin-top:6px; font-weight:500;">Guilt-Free Spend (20%)</div><div style="color:var(--muted); font-size:0.85rem; margin-top:4px;">Upgrade lifestyle without derailing your long-term wealth compounding.</div>
+                 </div>
+              `;
+           } else if (data.event === 'New Job') {
+              return `
+                 <div class="result-card" style="border-left: 4px solid var(--accent)">
+                   <div style="color:var(--accent); font-size:1.5rem; font-weight:700;">Action Plan: New Job Increment</div>
+                   <ul style="margin-top:15px; color:var(--muted); line-height:1.8;">
+                     <li><strong>Cap lifestyle inflation:</strong> Automatically siphon 100% of your new salary increment straight into an Equity SIP on the 1st of every month.</li>
+                     <li><strong>EPF Management:</strong> Transfer EPF from your previous employer via the UAN portal to continue receiving compound interest. Do not withdraw it.</li>
+                     <li><strong>Risk Audit:</strong> Review your emergency fund and upscale it to cover 6 months of your new, potentially higher lifestyle baseline.</li>
+                   </ul>
+                 </div>
+              `;
+           } else if (data.event === 'Baby / Childbirth') {
+              return `
+                 <div class="result-card" style="border-left: 4px solid #FF4E65">
+                   <div style="color:#FF4E65; font-size:1.5rem; font-weight:700;">Action Plan: Preparing for a Child</div>
+                   <ul style="margin-top:15px; color:var(--muted); line-height:1.8;">
+                     <li><strong>Education SIP:</strong> Start a dedicated Child Education SIP immediately. Due to the 18-year timeline, compounding does 80% of the heavy lifting. A simple ₹5k/month SIP becomes ₹38 Lakhs at 12%.</li>
+                     <li><strong>Health Coverage:</strong> Upgrade your current health insurance to a Family Floater covering maternity and neonatal care.</li>
+                     <li><strong>Nomination Audit:</strong> Add your child as a nominee across all your existing Mutual Funds, Demat, and Bank accounts. Update your Term Insurance cover to account for future education costs.</li>
+                   </ul>
+                 </div>
+              `;
+           } else {
+              return `
+                 <div class="result-card" style="border-left: 4px solid #10b981">
+                   <div style="color:#10b981; font-size:1.5rem; font-weight:700;">Action Plan: Marriage Alignment</div>
+                   <ul style="margin-top:15px; color:var(--muted); line-height:1.8;">
+                     <li><strong>The Money Talk:</strong> Sit down and completely align on current debts, credit scores, and long-term goals (House, FIRE) with full transparency.</li>
+                     <li><strong>Merge Protection:</strong> Drop individual health covers and instantly merge them into a higher-value Family Floater policy which is significantly cheaper.</li>
+                     <li><strong>Splitting Math:</strong> Use our Couple's Money Planner to decide a fair-share split constraint based on income ratios rather than an unfair 50/50 division.</li>
+                   </ul>
+                 </div>
+              `;
+           }
+        }
+      },
+      couple: {
+        title: "Couple's Money Planner",
+        desc: "Fair-share split calculation based on ratio of incomes.",
+        fields: [
+          { id: 'p1income', label: 'Partner 1 Monthly Income (₹)', type: 'number', val: 80000 },
+          { id: 'p2income', label: 'Partner 2 Monthly Income (₹)', type: 'number', val: 140000 },
+          { id: 'expenses', label: 'Combined Monthly Household Expenses (₹)', type: 'number', val: 90000 },
+          { id: 'jointSavings', label: 'Shared Monthly Savings Goal (₹)', type: 'number', val: 40000 }
+        ],
+        calc: (data) => {
+           const totalInc = data.p1income + data.p2income;
+           if (totalInc <= 0) throw new Error("Combined income must be greater than zero.");
+           const p1Ratio = data.p1income / totalInc;
+           const p2Ratio = data.p2income / totalInc;
+           
+           const p1Exp = data.expenses * p1Ratio;
+           const p2Exp = data.expenses * p2Ratio;
+           const p1Sav = data.jointSavings * p1Ratio;
+           const p2Sav = data.jointSavings * p2Ratio;
+
+           return `
+              <div class="result-card" style="text-align:center;">
+                <h3 style="font-size:1.5rem; color:var(--paper)">Pro-Rata Financial Split</h3>
+                <p style="color:var(--muted); margin-top:8px;">Splitting based on income percentage (${Math.round(p1Ratio*100)}% / ${Math.round(p2Ratio*100)}%) ensures absolute financial equity.</p>
+              </div>
+              
+              <div class="grid-2" style="margin-top:24px;">
+                 <div class="result-card" style="border-top: 4px solid var(--accent)">
+                    <div style="font-size:1.1rem; color:var(--paper); font-weight:700;">Partner 1 Contribution</div>
+                    <div style="margin-top:15px; display:flex; justify-content:space-between; color:var(--muted);"><span>Exp. Share:</span> <span style="color:var(--paper); font-weight:700">₹${formatMoney(p1Exp)}</span></div>
+                    <div style="margin-top:8px; display:flex; justify-content:space-between; color:var(--muted);"><span>Goal Share:</span> <span style="color:var(--paper); font-weight:700">₹${formatMoney(p1Sav)}</span></div>
+                    <div style="margin-top:15px; padding-top:15px; border-top:1px solid var(--border); display:flex; justify-content:space-between; color:var(--muted); font-weight:700;"><span>Total Monthly:</span> <span style="color:var(--accent); font-size:1.2rem;">₹${formatMoney(p1Exp + p1Sav)}</span></div>
+                 </div>
+                 <div class="result-card" style="border-top: 4px solid #4E65FF">
+                    <div style="font-size:1.1rem; color:var(--paper); font-weight:700;">Partner 2 Contribution</div>
+                    <div style="margin-top:15px; display:flex; justify-content:space-between; color:var(--muted);"><span>Exp. Share:</span> <span style="color:var(--paper); font-weight:700">₹${formatMoney(p2Exp)}</span></div>
+                    <div style="margin-top:8px; display:flex; justify-content:space-between; color:var(--muted);"><span>Goal Share:</span> <span style="color:var(--paper); font-weight:700">₹${formatMoney(p2Sav)}</span></div>
+                    <div style="margin-top:15px; padding-top:15px; border-top:1px solid var(--border); display:flex; justify-content:space-between; color:var(--muted); font-weight:700;"><span>Total Monthly:</span> <span style="color:#4E65FF; font-size:1.2rem;">₹${formatMoney(p2Exp + p2Sav)}</span></div>
+                 </div>
+              </div>
+              
+              <div class="result-card" style="margin-top:24px; background:var(--bg)">
+                 <p style="color:var(--muted); font-size:0.95rem; line-height:1.6; text-align:center;">
+                   <strong>Actionable step:</strong> Create a joint bank account. On the 1st of every month, Partner 1 transfers ₹${formatMoney(p1Exp+p1Sav)} and Partner 2 transfers ₹${formatMoney(p2Exp+p2Sav)} to completely automate your household and goals without friction.
+                 </p>
+              </div>
+           `;
+        }
+      }
+    };
+
+    // INIT
+    const params = new URLSearchParams(window.location.search);
+    const toolId = params.get('id') || 'fire'; // Default to FIRE if none
+    const config = configs[toolId];
+    const activePlan = localStorage.getItem('activePlan') || 'Free';
+
+    if (!config) {
+      document.getElementById('toolTitle').innerText = "Tool Not Found";
+      document.getElementById('toolForm').innerHTML = "Invalid URL parameter.";
+    } else if (toolId === 'couple' && activePlan !== 'Family') {
+      document.getElementById('toolTitle').innerText = "Family Plan Required";
+      document.getElementById('toolDesc').innerText = "The Couple's Money Planner is exclusive to the Family plan.";
+      document.getElementById('inputView').innerHTML = `
+        <div style="text-align:center; padding: 40px 20px;">
+           <div style="font-size:3rem; margin-bottom:16px;">🔒</div>
+           <h3 style="color:var(--paper); margin-bottom:12px;">Upgrade to Unlock</h3>
+           <p style="color:var(--muted); margin-bottom:24px;">This feature provides joint financial planning and fair-share calculations.</p>
+           <button type="button" class="btn-primary" onclick="window.location.href='index.html#pricing'">View Pricing Plans</button>
+        </div>
+      `;
+    } else {
+      document.getElementById('toolTitle').innerText = config.title;
+      document.getElementById('toolDesc').innerText = config.desc;
+      
+      const fieldsHtml = [];
+      for (const f of config.fields) {
+         if (f.type === 'select') {
+             const opts = f.opts.map(o => `<option value="${o}">${o}</option>`).join('');
+             fieldsHtml.push(`<div class="form-group"><label class="form-label">${f.label}</label><select class="form-select" id="${f.id}">${opts}</select></div>`);
+         } else {
+             fieldsHtml.push(`<div class="form-group"><label class="form-label">${f.label}</label><input type="number" class="form-input" id="${f.id}" value="${f.val}" required /></div>`);
+         }
+      }
+      document.getElementById('formFields').innerHTML = fieldsHtml.join('');
+      
+      if (params.get('auto') === '1') {
+         setTimeout(() => calculateTool({ preventDefault: () => {} }), 500);
+      }
+    }
+
+    // PROCESS
+    function calculateTool(e) {
+      e.preventDefault();
+      
+      const data = {};
+      config.fields.forEach(f => {
+         const el = document.getElementById(f.id);
+         data[f.id] = f.type === 'number' ? parseFloat(el.value) : el.value;
+      });
+
+      document.getElementById('inputView').style.display = 'none';
+      document.getElementById('loadingView').style.display = 'block';
+      
+      setTimeout(() => {
+        try {
+          const resultHtml = config.calc(data);
+          document.getElementById('loadingView').style.display = 'none';
+          document.getElementById('resultsContent').innerHTML = resultHtml;
+          document.getElementById('resultsView').style.display = 'block';
+        } catch (err) {
+          alert("Error: " + err.message);
+          resetTool();
+        }
+      }, 1500);
+    }
+
+    function resetTool() {
+      document.getElementById('resultsView').style.display = 'none';
+      document.getElementById('inputView').style.display = 'block';
+    }
+
+    // Chart.js functionalities for visual fidelity
+    let currentChart = null;
+    function renderFireChart(base, sip, rMonth, months) {
+       const ctx = document.getElementById('fireChartCanvas');
+       if (!ctx) return;
+       if (currentChart) currentChart.destroy();
+       
+       const labels = [];
+       const dataPoints = [];
+       let currentVal = base;
+       
+       const years = Math.ceil(months / 12);
+       for (let y = 0; y <= years; y++) {
+          labels.push(`Year ${y}`);
+          if (y === 0) {
+             dataPoints.push(base);
+          } else {
+             for(let m=0; m<12; m++) {
+                currentVal = currentVal * (1 + rMonth) + sip;
+             }
+             dataPoints.push(Math.round(currentVal));
+          }
+       }
+       
+       currentChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+             labels: labels,
+             datasets: [{
+                label: 'Corpus Growth (₹)',
+                data: dataPoints,
+                borderColor: '#1EB872',
+                backgroundColor: 'rgba(30, 184, 114, 0.2)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointRadius: 0
+             }]
+          },
+          options: {
+             responsive: true,
+             maintainAspectRatio: false,
+             plugins: { legend: { display: false } },
+             scales: { 
+                 y: { ticks: { color: '#8F94A3', callback: function(v) { return '₹' + (v/100000).toFixed(1) + 'L'; } }, grid: { color: '#2A2F3D' } },
+                 x: { ticks: { color: '#8F94A3', maxTicksLimit: 6 }, grid: { display: false } }
+             }
+          }
+       });
+    }
+
+    let doughnutChart = null;
+    function renderHealthDoughnut(score, color) {
+       const ctx = document.getElementById('healthCanvas');
+       if (!ctx) return;
+       if (doughnutChart) doughnutChart.destroy();
+       
+       doughnutChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+             datasets: [{
+                data: [score, 100 - score],
+                backgroundColor: [color, '#2A2F3D'],
+                borderWidth: 0,
+                cutout: '80%',
+                borderRadius: [20, 0]
+             }]
+          },
+          options: {
+             responsive: true,
+             maintainAspectRatio: false,
+             animation: { animateRotate: true, duration: 1500 },
+             plugins: { tooltip: { enabled: false } }
+          }
+       });
+    }
+  </script>
+</body>
+</html>

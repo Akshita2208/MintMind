@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard — MintMind</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --ink: #0f1117; --paper: #f5f2eb; --cream: #ede9df;
+    --accent: #1a6b4a; --accent2: #e8a020; --accent3: #c94a2a;
+    --muted: #7a7567; --border: rgba(15,17,23,0.12);
+    --card: #ffffff; --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink);
+    line-height: 1.6;
+  }
+  h1,h2,h3 { font-family: 'Syne', sans-serif; }
+  
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px; background: rgba(245,242,235,0.88);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.35rem; display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+  .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  .nav-btn { background: transparent; border: 1px solid var(--border); border-radius: 100px; padding: 8px 16px; cursor: pointer; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .dashboard-container { max-width: 1200px; margin: 40px auto; padding: 0 48px; }
+  .dash-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+  .dash-title { font-size: 2.5rem; font-weight: 800; }
+  .dash-sub { color: var(--muted); }
+  
+  .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 48px; }
+  .action-card {
+    background: var(--card); border: 2px dashed var(--border); border-radius: var(--radius);
+    padding: 30px; text-align: center; cursor: pointer; transition: all .2s;
+  }
+  .action-card:hover { border-color: var(--accent); background: #f0faf5; }
+  .action-icon { font-size: 2rem; margin-bottom: 10px; }
+  .action-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; }
+  
+  .reports-section h3 { font-size: 1.5rem; margin-bottom: 24px; }
+  .reports-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px; }
+  .report-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+  .report-header { display: flex; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+  .report-type { font-weight: 700; color: var(--accent); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; }
+  .report-date { font-size: 0.8rem; color: var(--muted); }
+  .report-body { display: flex; flex-direction: column; gap: 10px; }
+  .report-row { display: flex; justify-content: space-between; font-size: 0.9rem; }
+  .report-row strong { font-family: 'Syne', sans-serif; }
+  .green { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html">
+    <span class="logo-dot"></span> MintMind
+  </a>
+  <div>
+    <span id="userName" style="margin-right:20px; font-weight: 500;"></span>
+    <button class="nav-btn" onclick="logout()">Log out</button>
+  </div>
+</nav>
+
+<div class="dashboard-container">
+  <div class="dash-header">
+    <div>
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px; flex-wrap:wrap;">
+        <h1 class="dash-title" style="margin-bottom:0;">Your Dashboard</h1>
+        <span id="planBadge" style="background:var(--card); border:1px solid var(--border); padding:4px 12px; border-radius:100px; font-size:0.85rem; font-weight:600; color:var(--accent); display:flex; align-items:center; gap:6px;">⭐ Free Plan</span>
+        <a id="upgradeBtn" href="index.html#pricing" style="background:var(--accent); color:white; padding:4px 12px; border-radius:100px; font-size:0.85rem; font-weight:600; text-decoration:none; display:none;">Upgrade</a>
+      </div>
+      <p class="dash-sub">Run new analyses or view past reports.</p>
+    </div>
+  </div>
+
+  <div class="actions-grid">
+    <div class="action-card" onclick="checkFeatureAccess('tax')">
+      <div class="action-icon">📄</div>
+      <div class="action-title" id="title-tax">Tax Wizard (Form 16)</div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-top:6px;">Upload active PDF to find deductions</p>
+      <input type="file" id="taxInput" style="display:none" accept="application/pdf" onchange="uploadFile(this, 'tax-wizard')">
+    </div>
+    <div class="action-card" onclick="checkFeatureAccess('mfxray')">
+      <div class="action-icon">📈</div>
+      <div class="action-title" id="title-mfxray">MF Portfolio X-Ray</div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-top:6px;">Upload CAMS Statement (PDF/CSV)</p>
+      <input type="file" id="mfInput" style="display:none" accept=".pdf,.csv" onchange="uploadFile(this, 'mf-xray')">
+    </div>
+    <div class="action-card" onclick="window.location.href='tools.html?id=fire'">
+      <div class="action-icon icon-blue">🎯</div>
+      <div class="action-title">FIRE Path Planner</div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-top:6px;">Calculate your exact retirement age and corpus</p>
+    </div>
+    <div class="action-card" onclick="window.location.href='tools.html?id=health'">
+      <div class="action-icon icon-purple">❤️</div>
+      <div class="action-title">Money Health Score</div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-top:6px;">Audit your finances across 5 key dimensions</p>
+    </div>
+    <div class="action-card" onclick="window.location.href='tools.html?id=life'">
+      <div class="action-icon icon-red">🎊</div>
+      <div class="action-title">Life Event Advisor</div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-top:6px;">Smart plans for bonuses, baby, or new job</p>
+    </div>
+    <div class="action-card" onclick="checkFeatureAccess('couple')">
+      <div class="action-icon icon-pink">💑</div>
+      <div class="action-title" id="title-couple">Couple's Money Planner</div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-top:6px;">Fair split calculation for shared expenses</p>
+    </div>
+  </div>
+  
+  <div id="loadingUpload" style="display:none; text-align:center; margin-bottom:30px;">
+    <h3 style="color:var(--accent);">⏳ Analysing your document...</h3>
+    <p style="color:var(--muted); font-size: 0.9rem;">This usually takes 5-15 seconds.</p>
+  </div>
+
+  <div class="reports-section">
+    <h3>Recent Reports</h3>
+    <div class="reports-grid" id="reportsGrid">
+      <p style="color:var(--muted)">Loading reports...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem('token');
+  if(!token) {
+    window.location.href = 'index.html';
+  }
+
+  const activePlan = localStorage.getItem('activePlan') || 'Free';
+
+  function initAccessControl() {
+     const planBadge = document.getElementById('planBadge');
+     const upgradeBtn = document.getElementById('upgradeBtn');
+     
+     if (activePlan === 'Free') {
+        planBadge.innerText = '⭐ Free Plan';
+        upgradeBtn.style.display = 'inline-block';
+        document.getElementById('title-tax').innerHTML += ' <span style="font-size:0.9rem">🔒</span>';
+        document.getElementById('title-mfxray').innerHTML += ' <span style="font-size:0.9rem">🔒</span>';
+        document.getElementById('title-couple').innerHTML += ' <span style="font-size:0.9rem">🔒</span>';
+     } else if (activePlan === 'Pro') {
+        planBadge.innerText = '⭐ Pro Plan';
+        planBadge.style.background = '#e8f5ee';
+        upgradeBtn.style.display = 'inline-block';
+        document.getElementById('title-couple').innerHTML += ' <span style="font-size:0.9rem">🔒</span>';
+     } else {
+        planBadge.innerText = '⭐ Family Plan';
+        planBadge.style.background = '#e8f0fb';
+        planBadge.style.color = '#4E65FF';
+     }
+  }
+  
+  function checkFeatureAccess(type) {
+     if (type === 'tax' || type === 'mfxray') {
+        if (activePlan === 'Free') {
+           alert("This feature requires the Pro plan or higher. Please upgrade to unlock.");
+           window.location.href = 'index.html#pricing';
+           return;
+        }
+        if (type === 'tax') document.getElementById('taxInput').click();
+        if (type === 'mfxray') document.getElementById('mfInput').click();
+     } else if (type === 'couple') {
+        if (activePlan !== 'Family') {
+           alert("This feature is exclusive to the Family plan. Please upgrade to unlock.");
+           window.location.href = 'index.html#pricing';
+           return;
+        }
+        window.location.href = 'tools.html?id=couple';
+     }
+  }
+
+  initAccessControl();
+
+  async function loadDashboard() {
+    try {
+      let profile = {};
+      let dash = { reports: [] };
+
+      if (token === 'demo-token') {
+        // DEMO MODE FOR HACKATHON
+        const demoUser = JSON.parse(localStorage.getItem('demo_user') || '{}');
+        profile = { name: demoUser.name || 'Demo User' };
+        dash.reports = [
+          {
+            created_at: new Date().toISOString(),
+            report_type: 'tax',
+            file_name: 'Form16_Demo.pdf',
+            result: {
+              regime_recommendation: 'New Regime',
+              tax_old_regime: '3,12,000',
+              tax_new_regime: '2,83,600',
+              total_savings: '28,400'
+            }
+          }
+        ];
+      } else {
+        const [profileRes, dashRes] = await Promise.all([
+          fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch('/api/dashboard/', { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
+        
+        if(!profileRes.ok || !dashRes.ok) throw new Error("Session expired");
+        
+        profile = await profileRes.json();
+        dash = await dashRes.json();
+      }
+
+      document.getElementById('userName').innerText = profile.name;
+      
+      const grid = document.getElementById('reportsGrid');
+      grid.innerHTML = '';
+      
+      if(dash.reports.length === 0) {
+        grid.innerHTML = '<p style="color:var(--muted)">No reports found. Upload a document to get started.</p>';
+        return;
+      }
+      
+      dash.reports.forEach(r => {
+        const card = document.createElement('div');
+        card.className = 'report-card';
+        const date = new Date(r.created_at).toLocaleDateString();
+        
+        let contentHtml = '';
+        if(r.report_type === 'tax') {
+          contentHtml = `
+            <div class="report-row"><span>Status:</span> <strong class="green">${r.result.regime_recommendation}</strong></div>
+            <div class="report-row"><span>Old Tax:</span> <strong>₹${r.result.tax_old_regime}</strong></div>
+            <div class="report-row"><span>New Tax:</span> <strong>₹${r.result.tax_new_regime}</strong></div>
+            <div class="report-row"><span>Savings:</span> <strong class="green">₹${r.result.total_savings}</strong></div>
+          `;
+        } else {
+          contentHtml = `
+            <div class="report-row"><span>Total Inv:</span> <strong>${r.result.total_investment}</strong></div>
+            <div class="report-row"><span>Risk Score:</span> <strong>${r.result.risk_score}</strong></div>
+            <div class="report-row"><span>Est XIRR:</span> <strong class="green">${r.result.portfolio_xirr}</strong></div>
+            <div style="font-size:0.8rem;color:var(--muted);margin-top:8px">${r.result.suggestions[0]}</div>
+          `;
+        }
+        
+        card.innerHTML = `
+          <div class="report-header">
+            <div class="report-type">${r.report_type === 'tax' ? 'Tax Wizard' : 'MF X-Ray'}</div>
+            <div class="report-date">${date}</div>
+          </div>
+          <p style="font-size:0.8rem;margin-bottom:12px;color:var(--muted)">File: ${r.file_name}</p>
+          <div class="report-body">${contentHtml}</div>
+        `;
+        grid.appendChild(card);
+      });
+      
+    } catch(err) {
+      alert(err.message);
+      logout();
+    }
+  }
+
+  async function uploadFile(input, endpoint) {
+    const file = input.files[0];
+    if(!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File too large. Max 5MB.");
+      input.value = "";
+      return;
+    }
+    
+    document.getElementById('loadingUpload').style.display = 'block';
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      if (token === 'demo-token') {
+        // DEMO MODE MOCK UPLOAD
+        await new Promise(r => setTimeout(r, 2000));
+        alert('Analysis complete! Report saved (Demo Mode).');
+        loadDashboard();
+      } else {
+        const res = await fetch(`/api/${endpoint}/`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
+        
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.detail || 'Upload failed');
+        
+        alert('Analysis complete! Report saved.');
+        loadDashboard();
+      }
+    } catch(err) {
+      alert(err.message);
+    } finally {
+      document.getElementById('loadingUpload').style.display = 'none';
+      if (input.value !== undefined) input.value = "";
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem('token');
+    window.location.href = 'index.html';
+  }
+
+  loadDashboard();
+</script>
+</body>
+</html>

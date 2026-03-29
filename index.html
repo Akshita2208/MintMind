@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MintMind — AI Money Mentor</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --ink: #0f1117;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --accent: #1a6b4a;
+    --accent2: #e8a020;
+    --accent3: #c94a2a;
+    --muted: #7a7567;
+    --border: rgba(15,17,23,0.12);
+    --card: #ffffff;
+    --radius: 16px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    overflow-x: hidden;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  h1,h2,h3,h4 { font-family: 'Syne', sans-serif; line-height: 1.15; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(245,242,235,0.88);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.35rem; letter-spacing: -0.02em;
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; color: var(--ink);
+  }
+  .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  nav ul { list-style: none; display: flex; gap: 36px; }
+  nav ul a { text-decoration: none; color: var(--muted); font-size: 0.9rem; font-weight: 500; transition: color .2s; }
+  nav ul a:hover { color: var(--ink); }
+  .nav-cta {
+    background: var(--ink); color: var(--paper);
+    border: none; border-radius: 100px; padding: 10px 24px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
+    cursor: pointer; transition: background .2s, transform .15s;
+    text-decoration: none;
+  }
+  .nav-cta:hover { background: var(--accent); transform: translateY(-1px); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 120px 48px 80px;
+    position: relative; overflow: hidden;
+  }
+  .hero-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    align-items: center; gap: 64px; max-width: 1200px; margin: 0 auto; width: 100%;
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--cream); border: 1px solid var(--border);
+    border-radius: 100px; padding: 6px 14px;
+    font-size: 0.8rem; font-weight: 500; color: var(--accent);
+    margin-bottom: 24px;
+  }
+  .hero-tag span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  .hero h1 {
+    font-size: clamp(2.8rem, 5vw, 4.2rem);
+    font-weight: 800; letter-spacing: -0.03em;
+    line-height: 1.08;
+    margin-bottom: 24px;
+  }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p {
+    font-size: 1.1rem; color: var(--muted); max-width: 480px;
+    margin-bottom: 40px; line-height: 1.7; font-weight: 300;
+  }
+  .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--accent); color: white;
+    border: none; border-radius: 100px; padding: 14px 32px;
+    font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500;
+    cursor: pointer; transition: all .2s;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-primary:hover { background: #145c3d; transform: translateY(-2px); }
+  .btn-secondary {
+    background: transparent; color: var(--ink);
+    border: 1.5px solid var(--border); border-radius: 100px; padding: 14px 32px;
+    font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500;
+    cursor: pointer; transition: all .2s; text-decoration: none; display: inline-block;
+  }
+  .btn-secondary:hover { border-color: var(--ink); background: var(--cream); }
+
+  /* Hero card */
+  .hero-visual {
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .score-card {
+    background: var(--card); border-radius: var(--radius);
+    border: 1px solid var(--border); padding: 28px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    animation: floatA 5s ease-in-out infinite;
+  }
+  @keyframes floatA { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .score-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+  .score-label { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .score-badge { background: #e8f5ee; color: var(--accent); font-size: 0.8rem; font-weight: 600; padding: 4px 10px; border-radius: 100px; }
+  .score-number { font-family: 'Syne', sans-serif; font-size: 3.5rem; font-weight: 800; letter-spacing: -0.04em; color: var(--accent); line-height: 1; margin-bottom: 6px; }
+  .score-sub { font-size: 0.85rem; color: var(--muted); }
+  .score-bars { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+  .bar-row { display: flex; align-items: center; gap: 12px; }
+  .bar-label { font-size: 0.8rem; color: var(--muted); width: 110px; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 6px; background: var(--cream); border-radius: 100px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 100px; background: var(--accent); transition: width 1.5s ease; }
+  .bar-val { font-size: 0.8rem; font-weight: 600; color: var(--ink); width: 28px; text-align: right; }
+
+  .mini-cards { display: flex; gap: 14px; }
+  .mini-card {
+    flex: 1; background: var(--card); border-radius: 12px;
+    border: 1px solid var(--border); padding: 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  .mini-card:nth-child(2) { animation: floatB 4.5s ease-in-out infinite; }
+  @keyframes floatB { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+  .mini-card-icon { font-size: 1.4rem; margin-bottom: 10px; }
+  .mini-card-val { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; letter-spacing: -0.03em; }
+  .mini-card-val.green { color: var(--accent); }
+  .mini-card-val.amber { color: var(--accent2); }
+  .mini-card-lbl { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+
+  /* BG decoration */
+  .hero-bg-circle {
+    position: absolute; border-radius: 50%; opacity: .06;
+    background: var(--accent); pointer-events: none;
+  }
+
+  /* VIDEO SECTION */
+  .video-section { padding: 80px 48px; background: var(--paper); }
+  .video-inner { max-width: 1000px; margin: 0 auto; }
+  .video-container {
+    position: relative; width: 100%; border-radius: var(--radius);
+    overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    border: 1px solid var(--border); background: var(--ink);
+    aspect-ratio: 16 / 9;
+  }
+  .promo-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .promo-youtube { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+  /* STATS */
+  .stats-strip {
+    background: var(--ink); color: var(--paper);
+    padding: 40px 48px; display: flex; justify-content: center; gap: 80px; flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 2.4rem; font-weight: 800; letter-spacing: -0.04em; }
+  .stat-num .accent { color: var(--accent2); }
+  .stat-lbl { font-size: 0.85rem; color: rgba(245,242,235,0.55); margin-top: 4px; }
+
+  /* FEATURES */
+  .section { padding: 100px 48px; max-width: 1200px; margin: 0 auto; }
+  .section-tag {
+    font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .1em; color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .section-title { font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 16px; }
+  .section-sub { font-size: 1.05rem; color: var(--muted); max-width: 520px; font-weight: 300; line-height: 1.7; margin-bottom: 56px; }
+
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .feature-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 32px; transition: all .25s;
+    cursor: pointer; position: relative; overflow: hidden;
+  }
+  .feature-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--accent); transform: scaleX(0); transform-origin: left;
+    transition: transform .3s;
+  }
+  .feature-card:hover::before { transform: scaleX(1); }
+  .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.1); }
+  .feature-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; margin-bottom: 20px;
+  }
+  .icon-green { background: #e8f5ee; }
+  .icon-amber { background: #fef3dc; }
+  .icon-red { background: #fdeee9; }
+  .icon-blue { background: #e8f0fb; }
+  .icon-purple { background: #f0eefe; }
+  .icon-pink { background: #fde8f0; }
+  .feature-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; }
+  .feature-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.65; }
+  .feature-tag {
+    display: inline-block; margin-top: 16px;
+    font-size: 0.75rem; font-weight: 600; padding: 4px 10px;
+    border-radius: 100px; background: var(--cream); color: var(--accent);
+  }
+
+  /* HOW IT WORKS */
+  .how-section { background: var(--cream); padding: 100px 48px; }
+  .how-inner { max-width: 1200px; margin: 0 auto; }
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 56px; position: relative; }
+  .steps::before {
+    content: ''; position: absolute; top: 40px; left: 10%; right: 10%; height: 1px;
+    background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 6px, transparent 6px, transparent 16px);
+    opacity: .3;
+  }
+  .step { text-align: center; padding: 0 20px; }
+  .step-num {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--card); border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800;
+    margin: 0 auto 24px; position: relative; z-index: 2;
+    transition: all .3s;
+  }
+  .step:hover .step-num { background: var(--accent); color: white; border-color: var(--accent); }
+  .step-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
+  .step-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+  /* DEMO / TAX WIZARD */
+  .demo-section { padding: 100px 48px; max-width: 1200px; margin: 0 auto; }
+  .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+  .demo-left .section-sub { margin-bottom: 32px; }
+
+  .upload-area {
+    background: var(--card); border: 2px dashed var(--border); border-radius: var(--radius);
+    padding: 40px; text-align: center; cursor: pointer; transition: all .25s;
+    margin-bottom: 20px;
+  }
+  .upload-area:hover { border-color: var(--accent); background: #f0faf5; }
+  .upload-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .upload-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+  .upload-sub { font-size: 0.85rem; color: var(--muted); }
+
+  .demo-result {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  }
+  .result-header {
+    background: var(--accent); color: white; padding: 20px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .result-header-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; }
+  .result-badge-white { background: rgba(255,255,255,0.2); font-size: 0.8rem; padding: 4px 10px; border-radius: 100px; }
+  .result-body { padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .result-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .result-row:last-child { border-bottom: none; }
+  .result-row-label { font-size: 0.9rem; color: var(--muted); }
+  .result-row-val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; }
+  .result-row-val.green { color: var(--accent); }
+  .result-row-val.red { color: var(--accent3); }
+  .result-highlight {
+    background: #e8f5ee; border-radius: 12px; padding: 16px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 6px;
+  }
+  .result-highlight-label { font-size: 0.9rem; font-weight: 500; }
+  .result-highlight-val { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+
+  /* TESTIMONIALS */
+  .testimonials-section { background: var(--ink); color: var(--paper); padding: 100px 48px; }
+  .testimonials-inner { max-width: 1200px; margin: 0 auto; }
+  .testimonials-inner .section-tag { color: var(--accent2); }
+  .testimonials-inner .section-title { color: var(--paper); }
+  .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 56px; }
+  .testi-card {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius); padding: 28px; transition: all .25s;
+  }
+  .testi-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-4px); }
+  .testi-quote { font-size: 0.95rem; line-height: 1.7; color: rgba(245,242,235,0.8); margin-bottom: 20px; font-weight: 300; font-style: italic; }
+  .testi-author { display: flex; align-items: center; gap: 12px; }
+  .testi-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; font-weight: 700; font-family: 'Syne', sans-serif;
+  }
+  .av1 { background: #2d5a3d; color: #9fe1cb; }
+  .av2 { background: #5a3d0f; color: #fac775; }
+  .av3 { background: #3d0f2d; color: #f4c0d1; }
+  .testi-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; }
+  .testi-role { font-size: 0.78rem; color: rgba(245,242,235,0.45); margin-top: 2px; }
+  .testi-saving {
+    margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.82rem; color: rgba(245,242,235,0.5);
+  }
+  .testi-saving strong { color: var(--accent2); font-family: 'Syne', sans-serif; font-size: 1rem; }
+
+  /* PRICING */
+  .pricing-section { padding: 100px 48px; max-width: 1200px; margin: 0 auto; text-align: center; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 56px; text-align: left; }
+  .pricing-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 36px; transition: all .25s;
+  }
+  .pricing-card.featured {
+    background: var(--accent); color: white; border-color: var(--accent);
+    transform: scale(1.04);
+    box-shadow: 0 20px 48px rgba(26,107,74,.25);
+  }
+  .pricing-card:not(.featured):hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.1); }
+  .plan-name { font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 16px; }
+  .plan-name.featured { color: rgba(255,255,255,0.7); }
+  .plan-name:not(.featured) { color: var(--muted); }
+  .plan-price { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 4px; }
+  .plan-period { font-size: 0.85rem; color: var(--muted); margin-bottom: 24px; }
+  .plan-period.featured { color: rgba(255,255,255,0.6); }
+  .plan-divider { height: 1px; background: var(--border); margin-bottom: 24px; }
+  .plan-divider.featured { background: rgba(255,255,255,0.2); }
+  .plan-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+  .plan-features li { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+  .plan-features li::before { content: '✓'; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .plan-features.featured li::before { color: rgba(255,255,255,0.7); }
+  .plan-features.featured li { color: rgba(255,255,255,0.9); }
+  .plan-btn {
+    width: 100%; padding: 14px; border-radius: 100px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500;
+    cursor: pointer; border: none; transition: all .2s;
+  }
+  .plan-btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
+  .plan-btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .plan-btn-white { background: white; color: var(--accent); }
+  .plan-btn-white:hover { background: var(--cream); }
+
+  /* FAQ */
+  .faq-section { background: var(--cream); padding: 100px 48px; }
+  .faq-inner { max-width: 760px; margin: 0 auto; }
+  .faq-list { display: flex; flex-direction: column; gap: 0; margin-top: 48px; }
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-q {
+    width: 100%; text-align: left; background: none; border: none;
+    padding: 22px 0; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--ink);
+  }
+  .faq-icon { font-size: 1.2rem; color: var(--muted); transition: transform .3s; }
+  .faq-item.open .faq-icon { transform: rotate(45deg); color: var(--accent); }
+  .faq-a { font-size: 0.92rem; color: var(--muted); line-height: 1.7; max-height: 0; overflow: hidden; transition: max-height .4s ease, padding .3s; }
+  .faq-item.open .faq-a { max-height: 200px; padding-bottom: 20px; }
+
+  /* CTA */
+  .cta-section {
+    padding: 100px 48px; text-align: center; max-width: 800px; margin: 0 auto;
+  }
+  .cta-section h2 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 20px; }
+  .cta-section p { font-size: 1.05rem; color: var(--muted); margin-bottom: 40px; font-weight: 300; }
+  .cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .cta-form { display: flex; gap: 12px; max-width: 440px; margin: 0 auto 16px; }
+  .cta-input {
+    flex: 1; padding: 14px 20px; border-radius: 100px;
+    border: 1.5px solid var(--border); background: var(--card);
+    font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink);
+    outline: none; transition: border .2s;
+  }
+  .cta-input:focus { border-color: var(--accent); }
+  .cta-hint { font-size: 0.8rem; color: var(--muted); }
+
+  /* FOOTER */
+  footer {
+    background: var(--ink); color: var(--paper);
+    padding: 60px 48px 36px;
+  }
+  .footer-inner { max-width: 1200px; margin: 0 auto; }
+  .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+  .footer-brand p { font-size: 0.88rem; color: rgba(245,242,235,0.5); margin-top: 12px; line-height: 1.7; max-width: 280px; font-weight: 300; }
+  .footer-col h4 { font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: rgba(245,242,235,0.4); margin-bottom: 16px; }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col ul a { text-decoration: none; color: rgba(245,242,235,0.65); font-size: 0.9rem; transition: color .2s; }
+  .footer-col ul a:hover { color: var(--paper); }
+  .footer-divider { height: 1px; background: rgba(255,255,255,0.1); margin-bottom: 28px; }
+  .footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  .footer-copy { font-size: 0.82rem; color: rgba(245,242,235,0.35); }
+  .footer-disclaimer { font-size: 0.78rem; color: rgba(245,242,235,0.25); max-width: 480px; text-align: right; line-height: 1.5; }
+
+  /* MOBILE NAV TOGGLE */
+  .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+  .nav-hamburger span { width: 22px; height: 2px; background: var(--ink); border-radius: 2px; }
+
+  /* SCROLL ANIMATIONS */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    nav ul, .nav-cta { display: none; }
+    .nav-hamburger { display: flex; }
+    .hero { padding: 100px 24px 60px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+    .hero-visual { display: none; }
+    .stats-strip { padding: 40px 24px; gap: 40px; }
+    .section { padding: 70px 24px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .how-section { padding: 70px 24px; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .steps::before { display: none; }
+    .demo-section { padding: 70px 24px; }
+    .demo-grid { grid-template-columns: 1fr; gap: 40px; }
+    .testimonials-section { padding: 70px 24px; }
+    .testi-grid { grid-template-columns: 1fr; }
+    .pricing-section { padding: 70px 24px; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .pricing-card.featured { transform: none; }
+    .faq-section { padding: 70px 24px; }
+    .cta-section { padding: 70px 24px; }
+    footer { padding: 48px 24px 28px; }
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .footer-disclaimer { text-align: left; max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">
+    <span class="logo-dot"></span>
+    MintMind
+  </a>
+  <ul>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#video-demo" onclick="restartDemo()">Demo</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+  <div id="nav-auth-buttons" style="display:flex; align-items:center;">
+    <a class="nav-cta" href="javascript:void(0)" onclick="openAuth('signup')">Get started free</a>
+    <a class="nav-cta" style="background:transparent;color:var(--ink);border:1px solid var(--border);margin-left:-24px" href="javascript:void(0)" onclick="openAuth('login')">Log in</a>
+  </div>
+  <div id="nav-user-profile" style="display:none; align-items:center; gap: 16px;">
+    <span id="nav-welcome" style="color:var(--ink); font-weight:600; font-size:0.95rem;">Welcome back!</span>
+    <a class="nav-cta" href="dashboard.html">Dashboard</a>
+    <a href="javascript:void(0)" onclick="logoutUser()" style="color:var(--muted); font-size:0.9rem; text-decoration:none;">Log out</a>
+  </div>
+  <div class="nav-hamburger" onclick="this.classList.toggle('open')">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-circle" style="width:600px;height:600px;top:-200px;right:-100px;"></div>
+  <div class="hero-bg-circle" style="width:300px;height:300px;bottom:-100px;left:-80px;background:var(--accent2);"></div>
+  <div class="hero-grid">
+    <div class="hero-left reveal">
+      <div class="hero-tag"><span></span>AI-powered · Free for individuals</div>
+      <h1>Your personal <em>financial advisor</em>, no CA fees required</h1>
+      <p>MintMind uses AI to analyse your Form 16, audit your mutual fund portfolio, and build a personalised wealth roadmap — in minutes, not months.</p>
+      <div class="hero-btns">
+        <a href="#cta" class="btn-primary">Analyse my finances free</a>
+        <a href="#video-demo" class="btn-secondary" onclick="restartDemo()">See live demo</a>
+      </div>
+    </div>
+    <div class="hero-visual reveal">
+      <div class="score-card">
+        <div class="score-card-header">
+          <div>
+            <div class="score-label">Money Health Score</div>
+            <div class="score-number">74</div>
+            <div class="score-sub">Above average · 3 areas to improve</div>
+          </div>
+          <div class="score-badge">+12 this month</div>
+        </div>
+        <div class="score-bars">
+          <div class="bar-row">
+            <span class="bar-label">Emergency fund</span>
+            <div class="bar-track"><div class="bar-fill" style="width:85%"></div></div>
+            <span class="bar-val">85</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Tax efficiency</span>
+            <div class="bar-track"><div class="bar-fill" style="width:52%"></div></div>
+            <span class="bar-val">52</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Investment mix</span>
+            <div class="bar-track"><div class="bar-fill" style="width:68%"></div></div>
+            <span class="bar-val">68</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Insurance cover</span>
+            <div class="bar-track"><div class="bar-fill" style="width:40%"></div></div>
+            <span class="bar-val">40</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Retirement ready</span>
+            <div class="bar-track"><div class="bar-fill" style="width:61%"></div></div>
+            <span class="bar-val">61</span>
+          </div>
+        </div>
+      </div>
+      <div class="mini-cards">
+        <div class="mini-card">
+          <div class="mini-card-icon">💰</div>
+          <div class="mini-card-val green">₹28,400</div>
+          <div class="mini-card-lbl">Tax savings found</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-icon">📊</div>
+          <div class="mini-card-val amber">14.2%</div>
+          <div class="mini-card-lbl">True XIRR</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-icon">⚠️</div>
+          <div class="mini-card-val red" style="color:var(--accent3)">3</div>
+          <div class="mini-card-lbl">Overlapping funds</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO VIDEO -->
+<section class="video-section" id="video-demo">
+  <div class="video-inner reveal">
+    <div class="section-tag" style="text-align:center">Product Demo</div>
+    <h2 class="section-title" style="text-align:center">Watch How Money Mentor Works</h2>
+    <p class="section-sub" style="text-align:center; margin: 0 auto 40px;">See how Money Mentor helps you track expenses, plan budgets, and get smart financial advice in minutes.</p>
+    
+    <div class="video-container">
+      <!-- Autoplay AI Generated Demo (WebP format) -->
+      <img id="demoVideoPlayer" class="promo-video" src="demo-video.webp" alt="Money Mentor Demo Flow Recording">
+      <!-- Optional YouTube Embed (Uncomment to use) -->
+      <!-- <iframe class="promo-youtube" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" title="Money Mentor Demo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> -->
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stat">
+    <div class="stat-num"><span class="accent">14</span> Cr+</div>
+    <div class="stat-lbl">Demat accounts in India</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num"><span class="accent">95</span>%</div>
+    <div class="stat-lbl">Indians without a financial plan</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">₹<span class="accent">28K</span></div>
+    <div class="stat-lbl">Avg. tax deductions missed yearly</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num"><span class="accent">2</span> min</div>
+    <div class="stat-lbl">To get your full financial audit</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-tag">What we do</div>
+  <h2 class="section-title">Six tools that replace a ₹25,000/yr advisor</h2>
+  <p class="section-sub">Each feature is a standalone AI agent that handles a specific financial job — end to end, in plain English.</p>
+  <div class="features-grid">
+    <div class="feature-card reveal" onclick="handleFeatureClick('dashboard.html')">
+      <div class="feature-icon icon-amber">💸</div>
+      <div class="feature-title">Tax Wizard</div>
+      <div class="feature-desc">Upload your Form 16. We identify every deduction you're missing, model old vs new tax regime with your exact numbers, and rank tax-saving options by your risk profile.</div>
+      <span class="feature-tag">Most popular</span>
+    </div>
+    <div class="feature-card reveal" onclick="handleFeatureClick('dashboard.html')">
+      <div class="feature-icon icon-green">📈</div>
+      <div class="feature-title">MF Portfolio X-Ray</div>
+      <div class="feature-desc">Upload your CAMS or KFintech statement. Get true XIRR, overlap analysis, expense ratio drag, benchmark comparison, and an AI rebalancing plan — in 10 seconds.</div>
+      <span class="feature-tag">New</span>
+    </div>
+    <div class="feature-card reveal" onclick="handleFeatureClick('tools.html?id=fire')">
+      <div class="feature-icon icon-blue">🎯</div>
+      <div class="feature-title">FIRE Path Planner</div>
+      <div class="feature-desc">Input your age, income, goals, and existing investments. Get a month-by-month SIP roadmap, asset allocation shifts, insurance gaps, and emergency fund targets.</div>
+      <span class="feature-tag">Goal-based</span>
+    </div>
+    <div class="feature-card reveal" onclick="handleFeatureClick('tools.html?id=health')">
+      <div class="feature-icon icon-purple">❤️</div>
+      <div class="feature-title">Money Health Score</div>
+      <div class="feature-desc">A 5-minute onboarding flow scores you across 6 dimensions: emergency preparedness, insurance, investments, debt, tax efficiency, and retirement readiness.</div>
+      <span class="feature-tag">Free forever</span>
+    </div>
+    <div class="feature-card reveal" onclick="handleFeatureClick('tools.html?id=life')">
+      <div class="feature-icon icon-red">🎊</div>
+      <div class="feature-title">Life Event Advisor</div>
+      <div class="feature-desc">Got a bonus, inheritance, or new baby? AI advisor handles the specific financial decisions, customised to your tax bracket, portfolio, and goals — right when you need it.</div>
+      <span class="feature-tag">On-demand</span>
+    </div>
+    <div class="feature-card reveal" onclick="handleFeatureClick('tools.html?id=couple')">
+      <div class="feature-icon icon-pink">💑</div>
+      <div class="feature-title">Couple's Money Planner</div>
+      <div class="feature-desc">India's first joint financial planning tool. Both partners input data. AI optimises HRA claims, NPS matching, SIP splits, and builds a combined net worth tracker.</div>
+      <span class="feature-tag">First in India</span>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<div class="how-section" id="how">
+  <div class="how-inner">
+    <div class="section-tag">How it works</div>
+    <h2 class="section-title">From confused to confident in 4 steps</h2>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <div class="step-title">Upload your docs</div>
+        <div class="step-desc">Form 16 PDF, CAMS statement, or just answer a few questions. Secure, encrypted, never shared.</div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">2</div>
+        <div class="step-title">AI analyses instantly</div>
+        <div class="step-desc">Our agents parse, calculate XIRR, identify deductions, and spot portfolio overlap — in seconds.</div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">3</div>
+        <div class="step-title">Get your action plan</div>
+        <div class="step-desc">Plain-English report with specific steps: which funds to exit, which deductions to claim, how much to SIP.</div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">4</div>
+        <div class="step-title">Track your progress</div>
+        <div class="step-desc">Monthly score updates, portfolio drift alerts, and tax-saving reminders before March 31.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SANDBOX -->
+<section class="demo-section" id="sandbox">
+  <div class="demo-grid">
+    <div class="demo-left reveal">
+      <div class="section-tag">Interactive Sandbox</div>
+      <h2 class="section-title">Try the Tax Wizard now</h2>
+      <p class="section-sub">Upload any Form 16 PDF and get a complete tax analysis in under 2 minutes. Your data is processed securely and never stored.</p>
+      <div class="upload-area" id="uploadArea" onclick="handleUploadClick()">
+        <div class="upload-icon">📄</div>
+        <div class="upload-title">Drop your Form 16 here</div>
+        <div class="upload-sub">PDF only · Max 10MB · 256-bit encrypted</div>
+      </div>
+      <p style="font-size:0.8rem;color:var(--muted)">No Form 16 handy? <a href="#" style="color:var(--accent)">Try with sample data →</a></p>
+    </div>
+    <div class="demo-right reveal">
+      <div class="demo-result">
+        <div class="result-header">
+          <div class="result-header-title">Tax Analysis — Rahul Verma, FY 2024-25</div>
+          <div class="result-badge-white">New regime ✓</div>
+        </div>
+        <div class="result-body">
+          <div class="result-row">
+            <span class="result-row-label">Gross total income</span>
+            <span class="result-row-val">₹18,40,000</span>
+          </div>
+          <div class="result-row">
+            <span class="result-row-label">Tax under old regime</span>
+            <span class="result-row-val red">₹3,12,000</span>
+          </div>
+          <div class="result-row">
+            <span class="result-row-label">Tax under new regime</span>
+            <span class="result-row-val green">₹2,83,600</span>
+          </div>
+          <div class="result-row">
+            <span class="result-row-label">Missed 80C deductions</span>
+            <span class="result-row-val red">₹62,000 unused</span>
+          </div>
+          <div class="result-row">
+            <span class="result-row-label">NPS 80CCD(1B) benefit</span>
+            <span class="result-row-val green">Not claimed</span>
+          </div>
+          <div class="result-highlight">
+            <span class="result-highlight-label">Total savings available</span>
+            <span class="result-highlight-val">₹28,400</span>
+          </div>
+          <p style="font-size:0.8rem;color:var(--muted);margin-top:8px;line-height:1.6">Recommendation: Switch to new regime + invest ₹50,000 in NPS. File revised ITR before July 31.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<div class="testimonials-section">
+  <div class="testimonials-inner">
+    <div class="section-tag">Real users</div>
+    <h2 class="section-title">What people are saying</h2>
+    <div class="testi-grid">
+      <div class="testi-card reveal">
+        <p class="testi-quote">"I've been overpaying taxes for 4 years. MintMind found ₹31,000 in deductions in literally 90 seconds. I wish I had this earlier."</p>
+        <div class="testi-author">
+          <div class="testi-avatar av1">RP</div>
+          <div>
+            <div class="testi-name">Rohit Pandey</div>
+            <div class="testi-role">Software Engineer, Bengaluru</div>
+          </div>
+        </div>
+        <div class="testi-saving">Saved <strong>₹31,200</strong> this year</div>
+      </div>
+      <div class="testi-card reveal">
+        <p class="testi-quote">"The MF X-Ray showed me 6 overlapping funds I didn't know I had. My portfolio looked diversified but wasn't. Rebalanced and sleep better now."</p>
+        <div class="testi-author">
+          <div class="testi-avatar av2">SK</div>
+          <div>
+            <div class="testi-name">Sneha Kulkarni</div>
+            <div class="testi-role">Product Manager, Pune</div>
+          </div>
+        </div>
+        <div class="testi-saving">XIRR improved from <strong>9.2% → 13.8%</strong></div>
+      </div>
+      <div class="testi-card reveal">
+        <p class="testi-quote">"My wife and I used the Couple's Planner for our combined finances. Found we were double-paying insurance and losing ₹18K/year for no reason."</p>
+        <div class="testi-author">
+          <div class="testi-avatar av3">AM</div>
+          <div>
+            <div class="testi-name">Arjun Mehta</div>
+            <div class="testi-role">CA, Mumbai</div>
+          </div>
+        </div>
+        <div class="testi-saving">Saved <strong>₹18,000/year</strong> on insurance</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="section-tag">Pricing</div>
+  <h2 class="section-title">Fair pricing for every income level</h2>
+  <p class="section-sub" style="margin:0 auto 0;text-align:center">A full-service financial advisor charges ₹25,000/year. We charge less than a cup of coffee per month — or nothing at all.</p>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price">Free</div>
+      <div class="plan-period">Forever free</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li>Money Health Score</li>
+        <li>1 Tax analysis / year</li>
+        <li>Basic portfolio scan</li>
+        <li>Email report</li>
+      </ul>
+      <button class="plan-btn plan-btn-outline" id="btn-plan-Free" onclick="selectPlan('Free', 0)">Get started</button>
+    </div>
+    <div class="pricing-card featured">
+      <div class="plan-name featured">Pro · Most popular</div>
+      <div class="plan-price">₹299</div>
+      <div class="plan-period featured">per month · cancel anytime</div>
+      <div class="plan-divider featured"></div>
+      <ul class="plan-features featured">
+        <li>Unlimited Tax Wizard</li>
+        <li>MF Portfolio X-Ray</li>
+        <li>FIRE Path Planner</li>
+        <li>Life Event Advisor</li>
+        <li>Monthly score tracking</li>
+        <li>Priority AI support</li>
+      </ul>
+      <button class="plan-btn plan-btn-white" id="btn-plan-Pro" onclick="selectPlan('Pro', 299)">Start free trial</button>
+    </div>
+    <div class="pricing-card">
+      <div class="plan-name">Family</div>
+      <div class="plan-price">₹499</div>
+      <div class="plan-period">per month · up to 4 members</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li>Everything in Pro</li>
+        <li>Couple's Money Planner</li>
+        <li>Family net worth tracker</li>
+        <li>Shared goal planning</li>
+        <li>Dedicated advisor chat</li>
+      </ul>
+      <button class="plan-btn plan-btn-outline" id="btn-plan-Family" onclick="selectPlan('Family', 499)">Get Family plan</button>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<div class="faq-section">
+  <div class="faq-inner">
+    <div class="section-tag">FAQ</div>
+    <h2 class="section-title">Common questions</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFAQ(this)">
+          Is my financial data safe? <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">Yes. All documents are encrypted with AES-256 in transit and at rest. We do not store raw PDFs after analysis — only the structured output is retained to power your dashboard. We never sell or share your data with third parties.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFAQ(this)">
+          Is this a replacement for a SEBI-registered advisor? <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">MintMind provides AI-generated financial insights and educational guidance — not regulated financial advice. For complex investment decisions above ₹50 lakhs, we recommend consulting a SEBI RIA. That said, for the 95% of Indians who can't afford one, we're the best practical alternative.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFAQ(this)">
+          How accurate is the Tax Wizard? <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">The Tax Wizard uses the latest Income Tax Act rules, updated for every budget. Calculations are based on actual numbers from your Form 16. In beta testing across 800+ users, 94% reported that the suggested savings were actionable and accurate.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFAQ(this)">
+          What file formats does MF X-Ray support? <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">We support CAMS Consolidated Account Statement (PDF and email format), KFintech statements, and manually entered fund data. Support for Groww and Zerodha export formats is coming in Q2 2025.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFAQ(this)">
+          Can I use this if I'm a salaried employee with no investments? <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">Absolutely — that's actually our most common user. Start with the Tax Wizard (upload Form 16) and the Money Health Score. Both work even if you have zero investments. The FIRE Planner will then show you exactly where to start.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="section-tag" style="text-align:center">Get started</div>
+  <h2>Start your free financial audit today</h2>
+  <p>No credit card. No CA appointment. Just answers — in minutes.</p>
+  <div class="cta-form">
+    <input class="cta-input" type="email" placeholder="Enter your email"/>
+    <button class="btn-primary" onclick="handleCtaSignup()">Get started free</button>
+  </div>
+  <p class="cta-hint">Free forever · No card required · 2-minute setup</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo" style="color:var(--paper)"><span class="logo-dot"></span> MintMind</div>
+        <p>AI-powered financial guidance for every Indian. Built for the 95% who deserve better than guesswork.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#">Tax Wizard</a></li>
+          <li><a href="#">MF X-Ray</a></li>
+          <li><a href="#">FIRE Planner</a></li>
+          <li><a href="#">Health Score</a></li>
+          <li><a href="#">Pricing</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Disclaimer</a></li>
+          <li><a href="#">Security</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-divider"></div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 MintMind Technologies Pvt. Ltd. · Bengaluru, India</div>
+      <div class="footer-disclaimer">MintMind is not a SEBI-registered investment advisor. Content is for educational purposes only and does not constitute financial advice.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function restartDemo() {
+    const video = document.getElementById('demoVideoPlayer');
+    if (video) {
+        // Appending a timestamp query string forces browsers to re-download/restart animated webp images
+        const src = video.src.split('?')[0];
+        video.src = '';
+        setTimeout(() => { video.src = src + '?t=' + new Date().getTime(); }, 10);
+    }
+  }
+
+  function toggleFAQ(btn) {
+    const item = btn.parentElement;
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    nav.style.boxShadow = window.scrollY > 20 ? '0 2px 20px rgba(0,0,0,0.08)' : 'none';
+  });
+
+  // Auth & API Logic
+  function checkLoginState() {
+    const token = localStorage.getItem('token');
+    const demoUserStr = localStorage.getItem('demo_user');
+    if (token) {
+      document.getElementById('nav-auth-buttons').style.display = 'none';
+      document.getElementById('nav-user-profile').style.display = 'flex';
+      
+      if (demoUserStr) {
+        try {
+          const user = JSON.parse(demoUserStr);
+          if (user.name) {
+            document.getElementById('nav-welcome').innerText = `Welcome back, ${user.name.split(' ')[0]}`;
+          }
+        } catch (e) {}
+      }
+    }
+  }
+
+  // Run immediately on page load
+  checkLoginState();
+
+  function logoutUser() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('demo_user');
+    window.location.reload();
+  }
+
+  function handleFeatureClick(targetUrl) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Direct access
+      window.location.href = targetUrl;
+    } else {
+      // Not logged in. Save intent and prompt login.
+      localStorage.setItem('redirectFeature', targetUrl);
+      openAuth('signup');
+    }
+  }
+
+  function selectPlan(planName, price) {
+    localStorage.setItem('selectedPlan', JSON.stringify({ name: planName, price: price }));
+    const token = localStorage.getItem('token');
+    if (token) {
+      window.location.href = 'payment.html';
+    } else {
+      localStorage.setItem('redirectFeature', 'payment.html');
+      openAuth('signup');
+      document.getElementById('authTitle').innerText = 'Create account to continue';
+    }
+  }
+
+  function openAuth(type) {
+    document.getElementById('authModal').style.display = 'flex';
+    document.getElementById('authTitle').innerText = type === 'login' ? 'Welcome back' : 'Create your account';
+    document.getElementById('nameField').style.display = type === 'login' ? 'none' : 'block';
+    document.getElementById('authSubmit').innerText = type === 'login' ? 'Log in' : 'Sign up';
+    document.getElementById('authMode').value = type;
+    document.getElementById('authError').style.display = 'none';
+  }
+
+  function closeAuth() {
+    document.getElementById('authModal').style.display = 'none';
+  }
+
+  function handleCtaSignup() {
+    const email = document.querySelector('.cta-input').value;
+    openAuth('signup');
+    if(email) document.getElementById('authEmail').value = email;
+  }
+
+  async function submitAuth(e) {
+    e.preventDefault();
+    const mode = document.getElementById('authMode').value;
+    const name = document.getElementById('authName').value;
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
+    const btn = document.getElementById('authSubmit');
+    const errorEl = document.getElementById('authError');
+    
+    btn.innerText = 'Please wait...';
+    btn.disabled = true;
+    errorEl.style.display = 'none';
+
+    try {
+      const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/signup';
+      const payload = mode === 'login' ? { email, password } : { name, email, password };
+      
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      // 1. Prevent calling res.json() on empty responses
+      const text = await res.text();
+      let data = {};
+      if (text) {
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error("JSON Parse Error. Server returned:", text);
+          throw new Error('Server returned an unexpected response. Please try again.');
+        }
+      }
+
+      // 2. Add proper error handling using res.ok
+      if (!res.ok) {
+         throw new Error(data.detail || data.message || 'Authentication failed');
+      }
+      
+      if (mode === 'signup') {
+        // Auto login after signup
+        const loginRes = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const loginText = await loginRes.text();
+        const loginData = loginText ? JSON.parse(loginText) : {};
+        
+        if (loginRes.ok) {
+          localStorage.setItem('token', loginData.access_token);
+        } else {
+          throw new Error(loginData.detail || 'Auto-login failed after signup');
+        }
+      } else {
+        localStorage.setItem('token', data.access_token);
+      }
+      executeSmartRedirect();
+    } catch (err) {
+      console.error("Auth Exception:", err);
+
+      // DEMO MODE FOR HACKATHON: Fallback to localStorage if the backend is down
+      console.warn("Backend fail detected. Using local fallback mechanism for demo purposes.");
+      if (mode === 'signup') {
+        localStorage.setItem('demo_user', JSON.stringify({ name, email, password }));
+        localStorage.setItem('token', 'demo-token');
+        executeSmartRedirect();
+        return; // success
+      } else if (mode === 'login') {
+        const demoUser = JSON.parse(localStorage.getItem('demo_user') || '{}');
+        if (demoUser.email === email && demoUser.password === password) {
+           localStorage.setItem('token', 'demo-token');
+           executeSmartRedirect();
+           return; // success
+        }
+        // If they enter wrong credentials even for demo user, let it show the error below
+      }
+
+      errorEl.innerText = err.message || "An expected error occurred";
+      errorEl.style.display = 'block';
+      btn.innerText = mode === 'login' ? 'Log in' : 'Sign up';
+      btn.disabled = false;
+    }
+  }
+
+  function executeSmartRedirect() {
+    const redirectUrl = localStorage.getItem('redirectFeature');
+    if (redirectUrl) {
+      localStorage.removeItem('redirectFeature');
+      window.location.href = redirectUrl;
+    } else {
+      window.location.href = 'dashboard.html';
+    }
+  }
+
+  function handleUploadClick() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      openAuth('signup');
+      document.getElementById('authTitle').innerText = 'Create an account to upload';
+      return;
+    }
+    
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf';
+    input.onchange = async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        alert("File too large. Max 5MB.");
+        return;
+      }
+      
+      const area = document.getElementById('uploadArea');
+      const originalHTML = area.innerHTML;
+      area.innerHTML = '<div class="upload-icon">⏳</div><div class="upload-title">Analysing PDF...</div><div class="upload-sub">This takes about 10-15 seconds</div>';
+      area.style.pointerEvents = 'none';
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      try {
+        const res = await fetch('/api/tax-wizard/', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+        if (!res.ok) throw new Error(data.detail || 'Upload failed');
+        
+        // Populate results card manually
+        const resBody = document.querySelector('.result-body');
+        if (data.data) {
+           resBody.innerHTML = `
+            <div class="result-row"><span class="result-row-label">Gross total income</span><span class="result-row-val">₹${data.data.gross_income}</span></div>
+            <div class="result-row"><span class="result-row-label">Tax under old regime</span><span class="result-row-val red">₹${data.data.tax_old_regime}</span></div>
+            <div class="result-row"><span class="result-row-label">Tax under new regime</span><span class="result-row-val green">₹${data.data.tax_new_regime}</span></div>
+            <div class="result-highlight"><span class="result-highlight-label">Total savings available</span><span class="result-highlight-val">₹${data.data.total_savings}</span></div>
+            <p style="font-size:0.8rem;color:var(--muted);margin-top:8px;line-height:1.6">${data.data.recommendation_text}</p>
+           `;
+        }
+        area.innerHTML = '<div class="upload-icon">✅</div><div class="upload-title">Analysis Complete</div><div class="upload-sub">Report saved to your dashboard</div>';
+      } catch (err) {
+        alert(err.message);
+        area.innerHTML = originalHTML;
+      } finally {
+        area.style.pointerEvents = 'auto';
+      }
+    };
+    input.click();
+  }
+
+  // Check if logged in already inside index
+  if(localStorage.getItem('token')) {
+    const navCtas = document.querySelectorAll('.nav-cta');
+    if(navCtas.length > 0) {
+      navCtas[0].innerText = 'Dashboard';
+      navCtas[0].onclick = () => window.location.href = 'dashboard.html';
+      if(navCtas[1]) navCtas[1].style.display = 'none';
+    }
+  }
+
+  // Highlight active plan
+  function highlightActivePlan() {
+     let activePlan = localStorage.getItem('activePlan') || 'Free';
+     
+     const btnFree = document.getElementById('btn-plan-Free');
+     const btnPro = document.getElementById('btn-plan-Pro');
+     const btnFamily = document.getElementById('btn-plan-Family');
+     
+     if (activePlan === 'Free' && btnFree) {
+        btnFree.innerText = 'Current Plan';
+        btnFree.disabled = true;
+        btnFree.style.opacity = '0.6';
+        btnFree.style.cursor = 'default';
+     } 
+     else if (activePlan === 'Pro' && btnPro) {
+        btnPro.innerText = 'Current Plan';
+        btnPro.disabled = true;
+        btnPro.style.opacity = '0.9';
+        btnPro.style.cursor = 'default';
+        if(btnFree) btnFree.innerText = 'Downgrade';
+     }
+     else if (activePlan === 'Family' && btnFamily) {
+        btnFamily.innerText = 'Current Plan';
+        btnFamily.disabled = true;
+        btnFamily.style.opacity = '0.6';
+        btnFamily.style.cursor = 'default';
+        if(btnFree) btnFree.innerText = 'Downgrade';
+        if(btnPro) btnPro.innerText = 'Downgrade';
+     }
+  }
+  highlightActivePlan();
+</script>
+
+<!-- Auth Modal -->
+<style>
+  .modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15,17,23,0.4); backdrop-filter: blur(4px); z-index: 1000;
+    align-items: center; justify-content: center;
+  }
+  .modal-box {
+    background: var(--card); padding: 40px; border-radius: var(--radius);
+    width: 100%; max-width: 400px; box-shadow: 0 12px 48px rgba(0,0,0,0.15);
+    position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 16px; right: 20px; font-size: 1.5rem;
+    cursor: pointer; color: var(--muted); background: none; border: none;
+  }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; text-align: center; }
+  .modal-form { display: flex; flex-direction: column; gap: 16px; }
+  .modal-input {
+    padding: 14px 16px; border: 1px solid var(--border); border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.95rem; width: 100%; outline: none;
+  }
+  .modal-input:focus { border-color: var(--accent); }
+  .modal-btn {
+    background: var(--accent); color: white; border: none; padding: 14px;
+    border-radius: 100px; font-family: 'DM Sans', sans-serif; font-weight: 600;
+    font-size: 1rem; cursor: pointer; transition: background .2s; margin-top: 8px;
+  }
+  .modal-btn:hover { background: #145c3d; }
+  .modal-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+  .auth-error { color: var(--accent3); font-size: 0.85rem; text-align: center; display: none; margin-bottom: -8px; }
+</style>
+<div class="modal-overlay" id="authModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAuth()">×</button>
+    <div class="modal-title" id="authTitle">Create account</div>
+    <form class="modal-form" onsubmit="submitAuth(event)">
+      <input type="hidden" id="authMode" value="signup"/>
+      <div class="auth-error" id="authError"></div>
+      <div id="nameField">
+        <input type="text" id="authName" class="modal-input" placeholder="Full name" />
+      </div>
+      <input type="email" id="authEmail" class="modal-input" placeholder="Email address" required />
+      <input type="password" id="authPassword" class="modal-input" placeholder="Password" required minlength="6"/>
+      <button type="submit" class="modal-btn" id="authSubmit">Sign up</button>
+    </form>
+    <p style="text-align:center;font-size:0.85rem;color:var(--muted);margin-top:20px;">
+      <a href="javascript:void(0)" onclick="openAuth('login')" style="color:var(--accent)">Already have an account?</a>
+    </p>
+  </div>
+</div>
+</body>
+</html>
